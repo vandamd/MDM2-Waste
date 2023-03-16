@@ -10,8 +10,31 @@ england_df = pd.read_excel(xlsx, "Waste Gen Eng 2010-18")
 # Rename Relevant Columns
 england_df = england_df.rename(columns={'Total generation of waste, split by NACE economic activity and EWC-STAT waste material, 2010-2018, England':'Year', 'Unnamed: 2':'EWC-STAT description', 'Unnamed: 21':'Total waste generation', 'Unnamed: 3':'Hazardous/Non-hazardous split'})
 
-# Read columns A, C, D, V
-england_df = england_df[['Year', 'EWC-STAT description', 'Total waste generation', 'Hazardous/Non-hazardous split']]
+# Rename NACE columns
+nace_columns = {
+    'Unnamed: 4': 'A',
+    'Unnamed: 5': 'B',
+    'Unnamed: 6': 'C10-C12',
+    'Unnamed: 7': 'C13-C15',
+    'Unnamed: 8': 'C16',
+    'Unnamed: 9': 'C17_C18',
+    'Unnamed: 10': 'C19',
+    'Unnamed: 11': 'C20-C22',
+    'Unnamed: 12': 'C23',
+    'Unnamed: 13': 'C24_C25',
+    'Unnamed: 14': 'C26-C30',
+    'Unnamed: 15': 'C31-C33',
+    'Unnamed: 16': 'D',
+    'Unnamed: 17': 'E36_E37_E39',
+    'Unnamed: 18': 'F',
+    'Unnamed: 19': 'G-U_X_G4677',
+    'Unnamed: 20': 'EP_HH'
+}
+
+england_df = england_df.rename(columns=nace_columns)
+
+# Filter the data to show only the total waste generation
+england_df = england_df[england_df['Hazardous/Non-hazardous split'] == "Total"]
 
 # Replace z with 0
 england_df = england_df.replace('z', 0)
@@ -19,54 +42,44 @@ england_df = england_df.replace('z', 0)
 # Create a plotly figure
 fig = go.Figure()
 
-# Add line traces for each EWC-STAT description and hazardous/non-hazardous split
-for ewc in england_df['EWC-STAT description'].unique():
-    for split in ["Hazardous", "Non-hazardous"]:
-        ewc_df = england_df[(england_df['EWC-STAT description'] == ewc) & (england_df['Hazardous/Non-hazardous split'] == split)]
-        fig.add_trace(
-            go.Scatter(x=ewc_df['Year'], y=ewc_df['Total waste generation'], name=f"{split} - {ewc}", visible=False)
-        )
-
-# Set the visibility of the first two traces to True
-fig.data[0].visible = True
-fig.data[1].visible = True
+# Add area traces for each NACE code and EWC-STAT description
+for nace_code in nace_columns.values():
+    for ewc in england_df['EWC-STAT description'].unique():
+        ewc_df = england_df[(england_df['EWC-STAT description'] == ewc)].pivot_table(index='Year', columns='EWC-STAT description', values=nace_code).reset_index()
+        sum_values = ewc_df.iloc[:, 1:].sum(axis=1)
+        if sum_values.sum() > 0:
+            fig.add_trace(
+                go.Scatter(x=ewc_df['Year'], y=sum_values, name=f"{nace_code} - {ewc}", stackgroup=ewc, mode='lines', line_shape='spline', visible=(ewc == "Total"))
+            )
 
 # Define the dropdown menus
 dropdown_buttons = [
     dict(
-        args=[{"visible": [trace.name == f"{split} - {desc}" for trace in fig.data for split in ["Hazardous", "Non-hazardous"]]}],
+        args=[{"visible": [trace.stackgroup == desc for trace in fig.data]}],
         label=desc,
         method="update",
     )
     for desc in england_df['EWC-STAT description'].unique()
 ]
 
-# Update the visibility settings for the dropdown buttons
-for i, desc in enumerate(england_df['EWC-STAT description'].unique()):
-    visible_list = [False] * len(fig.data)
-    visible_list[i * 2] = True
-    visible_list[i * 2 + 1] = True
-    dropdown_buttons[i]['args'][0]['visible'] = visible_list
-
-# pop the first two items from the dropdown menu
-dropdown_buttons.pop(0)
-dropdown_buttons.pop(0)
-
-# pop the last item
+# pop last element from dropdown_buttons
 dropdown_buttons.pop(-1)
 
 # Update layout properties
 fig.update_layout(
-    title_text="Waste Generation in England",
+    title_text="Waste Generation in England by NACE Code and EWC-STAT Description",
     updatemenus=[
         dict(
             buttons=dropdown_buttons,
             direction="down",
-            x=0.5,
-            xanchor="center",
-            y=1.1,
+            # Make the dropdown show below the title
+            x=0,
+            xanchor="left",
+            y=1.07,
             yanchor="top",
-        )
+            pad={"r": 10, "t": 10},
+            showactive=True,
+        ),
     ]
 )
 
@@ -81,6 +94,9 @@ fig.update_traces(hovertemplate="<b>%{y}</b> tonnes")
 
 # Remove k from the y-axis tick labels
 fig.update_yaxes(tickformat=",")
+
+# Add marker to data points
+fig.update_traces(mode='markers+lines')
 
 # Show plot
 fig.show()
