@@ -29,5 +29,8 @@ fig.update_layout(
     yaxis_title="Recycling Rate (%)"
 )
 
+# Update hover to show "Year" and "Recycling Rate (%)"
+fig.update_traces(hovertemplate="Year: %{x}<BR>Recycling Rate: %{y:.2f}%")
+
 # Show the plot
 fig.show()
