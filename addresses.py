@@ -28,4 +28,4 @@ def longlat(df,addresses):
                     
         else:
             print(f'Request failed with status code {response.status_code}.')
-    return longitude, latitude
+    return df,longitude, latitude

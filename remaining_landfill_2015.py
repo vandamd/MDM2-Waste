@@ -24,9 +24,11 @@ df = df[df['landfill type'] == "Inert Landfill"]
 # Replace closed with 0
 df['remaining capacity'] = df['remaining capacity'].replace('Closed',0)
 
+# Addresses to be converted into longitude and latitude
 addresses = df['addresses']
 
-[longitude, latitude]=longlat(df,addresses)
+# Call function from addresses for longitude and latitude
+[df,longitude, latitude]=longlat(df,addresses)
 
 # Mapbox plot
 fig = px.scatter_mapbox(df,
