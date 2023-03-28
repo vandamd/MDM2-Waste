@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # Read data from file 'waste_data.xlsx'
-xlsx = pd.ExcelFile("waste_data.xlsx")
+xlsx = pd.ExcelFile("data/waste_data.xlsx")
 
 # Open sheet called "Waste Gen Eng 2010-18"
 england_df = pd.read_excel(xlsx, "Waste Gen Eng 2010-18")

@@ -2,7 +2,7 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # Read data from file 'waste_data.xlsx'
-xlsx = pd.ExcelFile("waste_data.xlsx")
+xlsx = pd.ExcelFile("data/waste_data.xlsx")
 
 # Open sheet called "Waste from Households"
 df = pd.read_excel(xlsx, "Waste from Households")
@@ -32,5 +32,30 @@ fig.update_layout(
 # Update hover to show "Year" and "Recycling Rate (%)"
 fig.update_traces(hovertemplate="Year: %{x}<BR>Recycling Rate: %{y:.2f}%")
 
-# Show the plot
-fig.show()
+# White background, grey gridlines
+fig.update_layout(
+    hovermode='x unified',
+    plot_bgcolor='white',
+    title_x=0.5,
+    title_y=0.88,
+    xaxis=dict(
+        gridcolor='LightGrey'
+    ),
+    yaxis=dict(
+        gridcolor='LightGrey'
+    )
+)
+
+# Better images
+config = {
+  'toImageButtonOptions': {
+    'format': 'png', # one of png, svg, jpeg, webp
+    'filename': 'custom_image',
+    'height': 575,
+    'width': 796,
+    'scale':10 # Multiply title/legend/axis/canvas sizes by this factor
+  }
+}
+
+# Show the figure
+fig.show(config=config)
