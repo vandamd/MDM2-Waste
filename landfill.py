@@ -36,4 +36,30 @@ df = df[df['remaining capacity'].isin(['Closed']) == False]
 df['latitude'] = 0
 df['longitude'] = 0
 
+# Create a postcode column
+df['postcode'] = 0
+
+# If the address appears 6 times, keep it, otherwise delete it
+df = df[df.groupby('addresses')['addresses'].transform('size') > 6]
+
+# Number of rows in the dataframe
+print(len(df))
+
+# Get the list of addresses
+addresses = df['addresses'].tolist()
+
+# If the address starts or ends with a space, delete the space
+for i in range(len(addresses)):
+    if addresses[i][0] == ' ':
+        addresses[i] = addresses[i][1:]
+    if addresses[i][-1] == '  ':
+        addresses[i] = addresses[i][:-1]
+    if addresses[i][-1] == ',':
+        addresses[i] = addresses[i][:-1]
+
+# Make a txt file with the addresses, one address per line
+with open('addresses.txt', 'w') as f:
+    for item in addresses:
+        f.write("%s \n" % item)
+
 # print(df)
