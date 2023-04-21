@@ -67,9 +67,6 @@ for i in range(0, len(postcodes), 100):
     response = requests.post(url, json={"postcodes": batch})
     data = response.json()
 
-    # print('\n')
-    # pprint.pprint(data['result'])
-
     # Loop through the results and add the latitude and longitude to the spreadsheet
     for result in data['result']:
         # If result is 'none' then skip
@@ -81,9 +78,6 @@ for i in range(0, len(postcodes), 100):
 
 # Remove the rows with a latitude or longitude of 0
 df = df[df['latitude'] != 0]
-
-# Remove the rows with a remaining capacity of 0
-# df = df[df['remaining capacity'] != 0]
 
 # Convert the remaining capcity and year columns to numeric
 df['remaining capacity'] = pd.to_numeric(df['remaining capacity'], errors='coerce')

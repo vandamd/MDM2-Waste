@@ -35,7 +35,7 @@ df['category'] = df['category/country'].str.split(",").str[0]
 df['waste'] = df['category/country'].str.split(",").str[1]
 
 # Remove 'E', 'E38', 'G4677', 'TOTAL_HH' from 'category'
-df = df[df['category'].isin(['E', 'E38', 'G4677', 'TOTAL_HH']) == False]
+# df = df[df['category'].isin(['E', 'E38', 'G4677', 'TOTAL_HH']) == False]
 
 # Delete the 'category/country' column
 df = df.drop(columns=['category/country'])
@@ -50,10 +50,10 @@ df = df[['category'] + [col for col in df.columns if col != 'category']]
 df = df[['country'] + [col for col in df.columns if col != 'country']]
 
 # Filter for 'C20-C22'
-df = df[df['category'] == 'C20-C22']
+df = df[df['category'] == 'TOTAL_HH']
 
 # Filter for W074
-df = df[df['waste'] == 'W074']
+df = df[df['waste'] == 'TOTAL']
 
 # Remove extra spaces from the column names
 df.columns = df.columns.str.strip()
